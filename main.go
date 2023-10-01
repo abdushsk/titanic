@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/gocarina/gocsv"
 )
@@ -17,19 +18,49 @@ func checkErr(err error) {
 	}
 }
 
+// s -> c -> q
+
 func main() {
 	humans := readHumans("assets/values.csv")
-
+	avgAge := 0.0
+	for _, v := range humans {
+		avgAge += float64(v.Age) / float64(len(humans))
+	}
 	for _, v := range humans {
 		if v.Age < 15 {
 			v.Survived = 1
 		}
-		if v.Sex == "female" && v.Age < 60 {
+		if v.Sex == "female" {
 			v.Survived = 1
 		}
+
+		// if v.Parch > 0 && v.SibSp == 0 {
+		// 	v.Survived = 1
+		// }
+		// if v.SibSp > 0 && v.Parch == 0 {
+		// 	v.Survived = 1
+		// }
+
+		if v.Pclass == 3 {
+			v.Survived = 0
+		}
+
+		if v.Parch == 2 && v.SibSp == 0 {
+			v.Survived = 1
+		}
+
+		if v.Parch > 2 && v.SibSp == 0 {
+			v.Survived = 0
+		}
+
+		if v.Fare < 8 {
+			v.Survived = 0
+		}
+
 		if v.Age > 70 {
 			v.Survived = 0
 		}
+
 	}
 
 	perc := getSurvPercentage(humans)
@@ -100,4 +131,8 @@ func AddId() {
 	}
 	wr.Flush()
 	ioutil.WriteFile("assets/surv.csv", bts.Bytes(), fs.ModePerm)
+}
+
+func (h *Human) isSingle() bool {
+	return strings.Contains(h.Name, "Miss.")
 }
