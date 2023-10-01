@@ -21,8 +21,14 @@ func main() {
 	humans := readHumans("assets/values.csv")
 
 	for _, v := range humans {
-		if v.Age < 40 {
+		if v.Age < 15 {
 			v.Survived = 1
+		}
+		if v.Sex == "female" && v.Age < 60 {
+			v.Survived = 1
+		}
+		if v.Age > 70 {
+			v.Survived = 0
 		}
 	}
 
