@@ -7,6 +7,8 @@ import (
 	"io/fs"
 	"io/ioutil"
 	"os"
+
+	"github.com/gocarina/gocsv"
 )
 
 func AddId() {
@@ -38,4 +40,28 @@ func checkErr(err error) {
 
 func main() {
 	AddId()
+}
+
+func readHumans(name string) []*Human {
+	bs, err := os.ReadFile(name)
+	checkErr(err)
+	var hs []*Human
+	err = gocsv.UnmarshalBytes(bs, &hs)
+	checkErr(err)
+	return hs
+}
+
+type Human struct {
+	Id          int     `csv:"id"`
+	Survived    int     `csv:"Survived,omitempty"`
+	PassengerId int     `csv:"PassengerId"`
+	Pclass      int     `csv:"Pclass"`
+	Name        string  `csv:"Name"`
+	Sex         string  `csv:"Sex"`
+	Age         int     `csv:"Age"`
+	SibSp       int     `csv:"SibSp"`
+	Parch       int     `csv:"Parch"`
+	Ticket      string  `csv:"Ticket"`
+	Fare        float64 `csv:"Fare"`
+	Embarked    string  `csv:"Embarked"`
 }
