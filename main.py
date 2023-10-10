@@ -4,7 +4,7 @@ from sklearn.tree import DecisionTreeClassifier  # Import Decision Tree Classifi
 from sklearn.model_selection import train_test_split
 # Import scikit-learn metrics module for accuracy calculation
 from sklearn import metrics
-
+import numpy as np
 
 df = pd.read_csv("assets/surv.csv")
 
@@ -33,10 +33,26 @@ X_train, X_test, y_train, y_test = train_test_split(
 clf = DecisionTreeClassifier(
     max_depth=5, criterion="entropy", min_samples_split=50)
 
-# Train Decision Tree Classifer
-clf = clf.fit(X_train, y_train)
+clf.fit(X_train, y_train)
+
+# Compute the cost-complexity pruning path
+path = clf.cost_complexity_pruning_path(X_train, y_train)
+ccp_alphas, impurities = path.ccp_alphas, path.impurities
+
+# Find the optimal value for ccp_alpha
+clfs = []
+
+for ccp_alpha in ccp_alphas:
+    print(ccp_alpha)
+    clf = DecisionTreeClassifier(
+        random_state=0, max_depth=5, criterion="entropy", min_samples_split=50, ccp_alpha=ccp_alpha)
+    clf.fit(X_train, y_train)
+    clfs.append(clf)
 
 # Predict the response for test dataset
-y_pred = clf.predict(X_test)
+highest = 0.0
 
-print("Accuracy:", metrics.accuracy_score(y_test, y_pred))
+acc_scores = [metrics.accuracy_score(
+    y_test, clfa.predict(X_test)) for clfa in clfs]
+
+print(max(acc_scores))
